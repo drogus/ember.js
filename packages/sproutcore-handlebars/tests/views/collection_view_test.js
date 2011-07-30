@@ -444,3 +444,48 @@ test("should allow view objects to be swapped out without throwing an error (#78
 
 });
 
+
+test("should work correctly with views nested inside collection", function() {
+  TemplateTests.myCollection = SC.ArrayProxy.create({
+    content: [SC.Object.create({foo: "foo", bar: "bar"})]
+  });
+
+  TemplateTests.MyItemView = SC.View.extend({
+    fooBinding: "content.foo"
+  });
+
+  TemplateTests.MyCollectionView = SC.CollectionView.extend({
+    itemViewClass: TemplateTests.MyItemView,
+    contentBinding: "TemplateTests.myCollection.content"
+  });
+
+  TemplateTests.MyView = SC.View.extend({
+    fooBinding: "parentView.foo",
+    barBinding: "parentView.content.bar",
+    baz: function() {
+      var foo = this.get("foo");
+      return foo ? foo + "-baz" : false;
+    }.property("foo").cacheable(),
+    classNameBindings: ["foo", "bar", "baz"],
+    classNames: ["child"]
+  });
+
+  var view = SC.View.create({
+    template: SC.Handlebars.compile(
+      "{{#collection TemplateTests.MyCollectionView}}" +
+      "  {{view TemplateTests.MyView}}" +
+      "{{/collection}}"
+    )
+  });
+
+  SC.run(function() {
+    view.appendTo('#qunit-fixture');
+  });
+
+  SC.run(function() {
+    // now check if it can respond to changes
+    TemplateTests.myCollection.objectAt(0).set("foo", "foooo");
+  });
+
+  equals(view.$(".child:first").attr("class"), 'sc-view child bar foooo-baz foooo');
+});
