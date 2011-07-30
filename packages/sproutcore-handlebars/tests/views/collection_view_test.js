@@ -489,3 +489,28 @@ test("should work correctly with views nested inside collection", function() {
 
   equals(view.$(".child:first").attr("class"), 'sc-view child bar foooo-baz foooo');
 });
+
+test("should not append class twice", function() {
+  TemplateTests.MyView = SC.View.extend({
+    foo: "foo",
+    barBinding: "foo",
+    bazBinding: "bar",
+    quxBinding: "baz",
+    fooBarBinding: "qux",
+    fooBazBinding: "fooBar",
+    classNameBindings: ["fooBaz"],
+    classNames: ["child"]
+  });
+
+  var view = SC.View.create({
+    template: SC.Handlebars.compile(
+      "{{view TemplateTests.MyView}}"
+    )
+  });
+
+  SC.run(function() {
+    view.appendTo('#qunit-fixture');
+  });
+
+  equals(view.$(".child").attr("class"), 'sc-view child foo');
+});
