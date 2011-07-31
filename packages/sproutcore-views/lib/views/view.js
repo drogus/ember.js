@@ -12,6 +12,20 @@ var getPath = SC.getPath, meta = SC.meta, fmt = SC.String.fmt;
 
 var destroyedError = "You can't call %@ on a destroyed view";
 
+var unique = function() {
+    var a = [];
+    var l = this.length;
+    for(var i=0; i<l; i++) {
+      for(var j=i+1; j<l; j++) {
+        // If this[i] is found later in the array
+        if (this[i] === this[j])
+          j = ++i;
+      }
+      a.push(this[i]);
+    }
+    return a;
+  };
+
 /**
   @static
 
@@ -753,7 +767,7 @@ SC.View = SC.Object.extend(
     this._applyAttributeBindings(buffer);
 
 
-    buffer.addClass(get(this, 'classNames').join(' '));
+    buffer.addClass(get(this, 'classNames').unique().join(' '));
     buffer.id(get(this, 'elementId'));
 
     var role = get(this, 'ariaRole');
