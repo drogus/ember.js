@@ -29,6 +29,36 @@ test("it should have its updateRoute method called when it is entered", function
   router.send('ready');
 });
 
+test("a RouteMatcher allows to change a way dynamic segment is matched", function() {
+  var match;
+
+  var matcher = Ember._RouteMatcher.create({
+    route: 'foo/:id',
+    dynamicSegmentPattern: "([^/#]+)"
+  });
+
+  match = matcher.match('foo/bar#L11');
+  equal(match.remaining, "#L11");
+  deepEqual(match.hash, {"id": "bar"});
+});
+
+test("a RouteMatcher allows to add more dynamic segment terminator", function() {
+  var match;
+
+  var matcher = Ember._RouteMatcher.create({
+    route: 'foo/:id#L:number',
+    dynamicSegmentTerminators: ["\\\\#"]
+  });
+
+  match = matcher.match('foo/bar#L11');
+  equal(match.remaining, "");
+  deepEqual(match.hash, {"id": "bar", "number": "11"});
+
+  match = matcher.match('foo/bar#L11/something');
+  equal(match.remaining, "/something");
+  deepEqual(match.hash, {"id": "bar", "number": "11"});
+});
+
 test("a RouteMatcher matches routes", function() {
   var match;
 

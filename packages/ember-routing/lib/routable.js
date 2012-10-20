@@ -188,7 +188,11 @@ Ember.Routable = Ember.Mixin.create({
   routeMatcher: Ember.computed(function() {
     var route = get(this, 'route');
     if (route) {
-      return Ember._RouteMatcher.create({ route: route });
+      return Ember._RouteMatcher.create({
+        route: route,
+        dynamicSegmentPattern: get(this, 'dynamicSegmentPattern'),
+        dynamicSegmentTerminators: get(this, 'dynamicSegmentTerminators')
+      });
     }
   }),
 
@@ -346,7 +350,14 @@ Ember.Routable = Ember.Mixin.create({
       var aDynamicSegments = get(a, 'routeMatcher.identifiers.length'),
           bDynamicSegments = get(b, 'routeMatcher.identifiers.length'),
           aRoute = get(a, 'route'),
-          bRoute = get(b, 'route');
+          bRoute = get(b, 'route'),
+          aIndex = a.get('index'),
+          bIndex = b.get('index');
+
+      if( (aIndex || aIndex == 0) && (bIndex || bIndex == 0) ) {
+        return aIndex - bIndex
+      }
+
 
       if (aRoute.indexOf(bRoute) === 0) {
         return -1;

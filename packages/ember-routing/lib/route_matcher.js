@@ -13,9 +13,12 @@ Ember._RouteMatcher = Ember.Object.extend({
 
   init: function() {
     var route = this.route,
+        dynamicSegmentPattern = this.dynamicSegmentPattern || "([^/]+)",
+        terminators = this.dynamicSegmentTerminators || [],
         identifiers = [],
         count = 1,
-        escaped;
+        escaped,
+        segmentRegexp;
 
     // Strip off leading slash if present
     if (route.charAt(0) === '/') {
@@ -24,9 +27,12 @@ Ember._RouteMatcher = Ember.Object.extend({
 
     escaped = escapeForRegex(route);
 
-    var regex = escaped.replace(/:([a-z_]+)(?=$|\/)/gi, function(match, id) {
+    terminators.push('$|/');
+    str = ':([a-z_]+)(?=' + terminators.join('|') + ')'
+    segmentRegexp = new RegExp(str, 'gi');
+    var regex = escaped.replace(segmentRegexp, function(match, id) {
       identifiers[count++] = id;
-      return "([^/]+)";
+      return dynamicSegmentPattern;
     });
 
     this.identifiers = identifiers;
